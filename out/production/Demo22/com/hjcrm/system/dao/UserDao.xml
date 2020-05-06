@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.UserDao">
+	<select id="queryUser" parameterType="com.hjcrm.system.bean.User" resultType="com.hjcrm.system.bean.User">
+		select * from hj_user where email=#{email} and password=md5(#{password});
+	</select>
+	<select id="queryUserEmail" parameterType="com.hjcrm.system.bean.User" resultType="com.hjcrm.system.bean.User">
+		select * from hj_user where email=#{email};
+	</select>
+	<select id="queryAllUserInfo" parameterType="com.hjcrm.contstans.PageBean" resultType="com.hjcrm.system.bean.User">
+				  select * from hj_user u left join hj_role r on(r.roleid=u.roleid) left join hj_dept d on(d.deptid=u.deptid)  limit #{currentPage},#{pageSize};
+	</select>
+	<select id="queryAllUserInfoCount" parameterType="int" resultType="int">
+		select count(*) from hj_user;
+	</select>
+	<update id="insertUser" parameterType="user">
+		insert into hj_user(username,password,email,phone,mobile,sex,deptid,roleid,state,userphoto,note)
+		 values(#{username},md5(123123),#{email},#{phone},#{mobile},#{sex},#{deptid},#{roleid},#{state},#{userphoto},#{note});
+	</update>
+	<update id="deleteUserInfoByIds" parameterType="java.util.List">
+		delete from hj_user where userid in
+		<foreach collection="list" item="id" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+		;
+	</update>
+	<update id="updateUserInfo" parameterType="user">
+			update hj_user set  username=#{username},password=md5(#{password}),email=#{email},phone=#{phone},mobile=#{mobile},
+		sex=#{sex},deptid=#{deptid},roleid=#{roleid},state=#{state},userphoto=#{userphoto},
+		<if test="note!=null and note!=''">
+			note=#{note}
+		</if>
+		where userid=#{userid};
+	</update>
+	<update id="editPassword" parameterType="java.util.HashMap">
+		update hj_user set password=md5(#{password}) where userid=#{userid};
+	</update>
+</mapper>

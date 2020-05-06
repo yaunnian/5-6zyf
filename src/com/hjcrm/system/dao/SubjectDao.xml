@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.SubjectDao">
+    <select id="querySubject" parameterType="int" resultType="subject">
+      select s.subjectname,s.subjectcode,s.note,s.subjectid,s.courseid
+      from hj_subject s where s.courseid=#{courseid}
+    </select>
+    <select id="queryAllSubject" parameterType="com.hjcrm.contstans.PageBean" resultType="subject">
+      select c.coursename,s.subjectname,s.subjectcode,s.note,s.subjectid,s.courseid
+      from hj_subject s LEFT JOIN hj_course c on c.courseid=s.courseid
+       limit #{currentPage},#{pageSize};
+    </select>
+    <select id="queryAllSubjectCount" parameterType="int" resultType="int">
+          SELECT count(subjectname) from hj_subject
+    </select>
+        <insert id="insertSubject" parameterType="subject">
+            insert into hj_subject(courseid,subjectname,subjectcode,note) values
+              (#{courseid},#{subjectname},#{subjectcode},#{note});
+        </insert>
+    <update id="updateSubjet" parameterType="subject">
+        update hj_subject set courseid=#{courseid},subjectname=#{subjectname},subjectcode=#{subjectcode},note=#{note}
+        where subjectid=#{subjectid}
+    </update>
+    <delete id="deleteSubject" parameterType="java.util.List">
+        delete from hj_subject where subjectid in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

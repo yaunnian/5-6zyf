@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.resource.dao.ResourceDao">
+    <!--查询所有资源信息-->
+    <select id="queryAllResource" parameterType="java.util.Map" resultType="resource">
+        SELECT r.create_time,r.state,r.isZhuanyi,u.username createrName,r.belongid,r.source,r.address,
+        r.resourceName,r.phone,r.tel,r.resourceLevel,r.yunYingNote,r.resourceLevel,r.yunYingResourceLevel,
+        u.roleid,r.courseid,r.resourceId,r.userid,c.coursename courseName,r.createrName belongName,r.xiaoShouNote,
+        r.nextVisitTime,r.firstVisitTime,r.email,r.idCard,r.qq,r.weixin,r.assignTime
+        from       hj_resource r
+        left join hj_user u on(u.userid=r.userid)
+        left join hj_course c on (c.courseid=r.courseid)
+         <if test="roleid !=2 and roleid!=1">
+             where  r.belongid=#{userid} and r.state=1
+         </if>
+        <if test="roleid==2">
+            where r.state!=2
+        </if>
+        LIMIT #{currentPage},#{pageSize};
+    </select>
+    <!--查询所有的创建者-->
+    <select id="queryAllCreatePerson" parameterType="resource" resultType="resource">
+         select u.username,u.userid,u.deptid from hj_user u left join hj_dept d on (d.deptid=u.deptid)
+         where u.deptid in(2,5) or u.deptid in(
+         select deptid from hj_dept where deptparaid in(select deptid from hj_dept where deptparaid in(2,5))
+        )
+    </select>
+    <!--资源添加-->
+    <insert id="addResource" parameterType="resource">
+        insert into hj_resource(userid,deptid,create_time,resourceName,phone,tel,weixin,qq,address,state,source,courseid,yunYingResourceLevel,resourceLevel,nextVisitTime,yunYingNote,xiaoShouNote,idCard,email)
+        value (#{userid},#{deptid},CURRENT_TIMESTAMP,#{resourceName},#{phone},#{tel},#{weixin},#{qq},#{address},0,#{source},#{courseid},#{yunYingResourceLevel},#{resourceLevel},#{nextVisitTime},#{yunYingNote},#{xiaoShouNote},#{idCard},#{email})
+    </insert>
+    <!--运营销售信息修改-->
+    <update id="updateResource" parameterType="resource">
+        update hj_resource set deptid=#{deptid},resourceName=#{resourceName},
+        phone=#{phone},tel=#{tel},weixin=#{weixin},qq=#{qq},address=#{address},
+        <if test="resourceLevel != null and resourceLevel!=''">
+            resourceLevel=#{resourceLevel},
+        </if>
+        <if test="nextVisitTime != null">
+            nextVisitTime=#{nextVisitTime},
+        </if>
+        <if test="email != null and email!=''">
+            email=#{email},
+        </if>
+        <if test="idCard != null and idCard!=''">
+            idCard=#{idCard},
+        </if>
+        <if test="yunYingNote != null and yunYingNote!=''">
+            yunYingNote=#{yunYingNote},
+        </if>
+        <if test="source!=null and source!=''">
+            source=#{source},
+        </if>
+        <if test="courseid != null and courseid!=''">
+            courseid=#{courseid},
+        </if>
+        <if test="xiaoShouNote !=null and xiaoShouNote!=''">
+            xiaoShouNote=#{xiaoShouNote},
+        </if>
+        userid=#{userid}
+        where resourceId=#{resourceId}
+    </update>
+
+    <select id="queryResourceCount" parameterType="java.util.HashMap" resultType="resource">
+        SELECT * from hj_resource r join hj_user u on(u.userid=r.userid)left join hj_course c on (c.courseid=r.courseid) where u.roleid=#{roleid} and r.userid=#{userid} and r.deptid=#{deptid}
+    </select>
+    <!--查询所有资源的数量-->
+    <select id="count" resultType="int" parameterType="int">
+         SELECT count(*) from hj_resource r join hj_user u on(u.userid=r.userid)
+    </select>
+    <!--删除资源 批量-->
+    <delete id="deleteResources" parameterType="java.util.List">
+        delete from hj_resource where  resourceId in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    <!--查询所有的销售人员-->
+    <select id="queryAllXiaoShou" parameterType="resource" resultType="resource">
+       select u.username,u.userid from hj_user u left join hj_dept d on u.deptid = d.deptid
+        where d.deptparaid=5 or d.deptid = 5 or  d.deptid in
+      (select deptid from hj_dept where deptparaid in (select deptid from hj_dept where deptparaid = 5))
+    </select>
+    <!--分配资源-->
+    <update id="assigntoResource" parameterType="java.util.HashMap">
+        update hj_resource r set assignTime=CURRENT_TIMESTAMP,state=1,createrName=(select username from hj_user where userid=#{belongid}),r.belongid=#{belongid} where resourceId=#{resourceIds}
+    </update>
+    <!--转消资源-->
+    <update id="assignResource" parameterType="java.util.HashMap">
+        update hj_resource r set assignTime=CURRENT_TIMESTAMP,state=1,createName=(select username from hj_user where userid=#{belongid}),r.belongid=#{belongid} where  resourceId=#{resourceIds}
+    </update>
+
+    <select id="queryXiaoShouByRoleid" parameterType="int" resultType="com.hjcrm.system.bean.Role">
+        select * from hj_dept d left join hj_role r on (r.deptid=d.deptid) where d.deptid=#{deptid}
+    </select>
+        <!--显示资源详细信息-->
+    <select id="details" parameterType="java.util.HashMap" resultType="resource">
+     SELECT r.create_time,r.state,r.isZhuanyi,u.username createrName,r.belongid,r.source,r.address,
+        r.resourceName,r.phone,r.tel,r.resourceLevel,r.yunYingNote,r.resourceLevel,r.yunYingResourceLevel,
+        u.roleid,r.courseid,r.resourceId,r.userid,c.coursename courseName,r.createrName belongName,r.xiaoShouNote,
+        r.nextVisitTime,r.firstVisitTime,r.email,r.idCard,r.qq,r.weixin,v.visitRecord
+        from       hj_resource r
+        left join hj_user u on(u.userid=r.userid)
+        left join hj_course c on (c.courseid=r.courseid)
+        left join hj_visitRecord v on (v.resourceId=r.resourceId)
+        where r.resourceId=#{resourceId}
+    </select>
+    <!--查询回访信息-->
+    <select id="huifang" parameterType="java.util.HashMap" resultType="visitrecord">
+        select *
+        from hj_visitrecord
+        where resourceId=#{resourceId}
+    </select>
+    <!--修改资源状态-->
+    <update id="updateResourcestate" parameterType="resource">
+        update hj_resource set state=2 where resourceId=#{resourceId}
+    </update>
+
+   <!-- <insert id="addResource" parameterType="resource">
+        insert into hj_resource(userid,deptid,resourceName,phone,tel,address,source,courseid,xiaoShouNote,resourceLevel)
+        VALUES(#{userid},#{deptid},#{resourceName},#{phone},#{tel},#{address},#{source},#{courseid},#{xiaoShouNote},#{resourceLevel});
+    </insert>-->
+  <!--  <select id="queryCourse" parameterType="com.hjcrm.contstans.PageBean" resultType="course">
+        select * from hj_course  limit #{currentPage},#{pageSize};
+    </select>
+    <select id="queryCourseCount" resultType="int">
+        select count(*) from hj_course;
+    </select>
+    <select id="queryCourseAll" resultType="course">
+        select * from hj_course;
+    </select>
+    <insert id="addCourse" parameterType="course">
+        insert into hj_course(courseTeacherName,courseName,courseMoney,courseDescribe,note) values
+        (#{courseTeacherName},#{courseName},#{courseMoney},#{courseDescribe},#{note})
+    </insert>
+    <update id="updateCourse" parameterType="course">
+        update hj_course set courseTeacherName=#{courseTeacherName},courseName=#{courseName},courseMoney=#{courseMoney},
+        courseDescribe=#{courseDescribe},note=#{note} where courseid=#{courseid}
+    </update>-->
+</mapper>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.RoleDao">
+
+    <select id="queryAllRole" parameterType="com.hjcrm.contstans.PageBean" resultType="role">
+       select r.roleid,r.rolename,d.deptname, group_concat(m.menuname SEPARATOR ',')menuname from
+        hj_role r left join hj_role_menu rm on (r.roleid=rm.roleid) left join hj_menu m on (rm.menuid=m.menuid)
+        left join hj_dept d on (d.deptid=r.deptid) group by r.roleid LIMIT #{currentPage},#{pageSize};
+    </select>
+    <insert id="addOrUpdateRole" parameterType="role">
+        insert into hj_role(rolename,deptid) values(#{rolename},#{deptid});
+    </insert>
+    <insert id="insertRoleMenu" parameterType="role_menu">
+        insert into hj_role_menu(roleid,menuid) values (#{roleid},#{menuid})
+    </insert>
+    <select id="queryRoleOne" parameterType="string"  resultType="role">
+          select * from hj_role where deptid=#{deptid};
+    </select>
+    <select id="queryAllRoleCount" parameterType="int" resultType="int">
+        /*select count(DISTINCT(r.rolename)) from hj_role_menu rm left join hj_role r   on (r.roleid=rm.roleid) left join hj_menu m on (rm.menuid=m.menuid)
+        left join hj_dept d on (d.deptid=r.deptid)*/
+        select count(r.rolename) from hj_role r
+    </select>
+    <delete id="deleteRoleByIds" parameterType="java.util.List">
+        delete from hj_role where roleid in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+      </delete>
+    <delete id="removeRoleMenu" parameterType="string">
+        delete from hj_role_menu where roleid=#{roleid}
+    </delete>
+    <update id="updateRoleById" keyProperty="role">
+        update hj_role set rolename=#{rolename},deptid=#{deptid} where roleid=#{roleid};
+    </update>
+</mapper>

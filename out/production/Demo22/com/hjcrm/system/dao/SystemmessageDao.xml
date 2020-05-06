@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.SystemmessageDao">
+   <select id="querySystemmessageAll" parameterType="com.hjcrm.contstans.PageBean" resultType="systemmessage">
+       select * from hj_systemmessage limit #{currentPage},#{pageSize};
+   </select>
+    <select id="querySystemmessageAllCount" parameterType="int" resultType="int">
+        select count(*) from  hj_systemmessage
+    </select>
+    <insert id="insertSubject" parameterType="systemmessage">
+    insert into hj_systemmessage(messagetitle,messageContent) values
+    (#{messagetitle},#{messageContent});
+</insert>
+<update id="updateSubjet" parameterType="systemmessage">
+        update hj_systemmessage set messagetitle=#{messagetitle},messageContent=#{messageContent}
+        where systemmessageId=#{systemmessageId}
+    </update>
+    <update id="sendMessage" parameterType="systemmessage">
+        update hj_systemmessage set issend=#{issend}
+        <if test="issend==1">
+            ,send_time=CURRENT_TIMESTAMP
+        </if>
+        <if test="issend!=1">
+            ,send_time=null
+        </if>
+        where systemmessageId=#{systemmessageId}
+    </update>
+
+</mapper>

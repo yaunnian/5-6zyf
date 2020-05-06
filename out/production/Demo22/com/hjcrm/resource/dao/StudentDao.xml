@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.resource.dao.StudentDao">
+    <insert id="addDealrecord" parameterType="student">
+        insert into hj_student
+        (resourceId,userid,studentstate,courseid,preferinfo,ishavenetedu,netedumoney,remituser,dealtime,dealprice,isOnlineBuy)
+        values
+        (#{resourceId},#{userid},1,#{courseid},#{preferinfo},#{ishavenetedu},#{netedumoney},#{remituser},#{dealtime},#{dealprice},#{isOnlineBuy})
+    </insert>
+    <update id="updateStudentName" parameterType="java.util.HashMap">
+        update hj_student set studentName=(select resourceName from hj_resource where resourceId=#{resourceId})
+        where resourceId=#{resourceId}
+    </update>
+    <select id="queryStudents" parameterType="java.util.HashMap" resultType="student">
+        select s.studentName,r.phone,s.studentstate,s.dealtime,r.idCard,s.school,s.education,s.preferinfo,r.createrName belongName,
+        s.LCWname,s.LCWpassword,r.email,s.company,s.department,s.position,s.companyTel,s.studentId,s.resourceId,s.userid,r.source,
+        c.coursename courseName,sub.subjectname,s.dealprice sumPayMoney,s.commit_time,s.banci,s.courseid,s.dealprice
+        from hj_student s left join hj_resource r on(s.resourceId=r.resourceId) left join hj_user u on (u.userid=r.userid)
+        left join hj_course c on(s.courseid=c.courseid) left join hj_subject sub on(sub.courseid=c.courseid)
+        <if test="roleid!=2 and roleid!=1 and deptid!=4">
+            where  s.userid=#{userid} and s.studentstate!=2
+        </if>
+        <if test="deptid==4">
+           where  s.studentstate=2
+        </if>
+        LIMIT #{currentPage},#{pageSize}
+    </select>
+    <select id="StudentAllCount" resultType="int" >
+        select count(*) from hj_student
+    </select>
+    <insert id="addStudent" parameterType="student">
+        insert into hj_student(studentName,phone,source,idCard,education,school,email,company,department,
+        position,companyAddr,companyTel,xiaoShouNote) values
+        (#{studentName},#{phone},#{source},#{idCard},#{education},#{school},#{email},#{company},#{department},
+        #{position},#{companyAddr},#{companyTel},#{xiaoShouNote})
+    </insert>
+    <update id="updateStudent" parameterType="student">
+        update hj_student set userid=#{userid},studentName=#{studentName},idCard=#{idCard},school=#{school},education=#{education},LCWname=#{LCWname},LCWpassword=#{LCWpassword},
+        email=#{email},company=#{company},position=#{position},companyTel=#{companyTel},tel=#{tel},weixin=#{weixin},qq=#{qq},address=#{address},banci=#{banci},
+        companyAddr=#{companyAddr},department=#{department},isjieye=#{isjieye}
+        where studentId=#{studentId}
+    </update>
+        <select id="studentDetails" parameterType="java.util.HashMap" resultType="student">
+            select s.studentId,r.phone,s.studentstate,r.source,s.studentName,s.headmaster,r.idCard,s.school,s.education,s.returnTime,s.returnNote,s.LCWname,
+              s.LCWpassword,r.email,s.company,s.department,s.position,s.companyTel,s.companyAddr,r.tel,r.weixin,r.qq,s.isjieye,r.address,s.banci
+              from hj_student s left join hj_resource r on (r.resourceId=s.resourceId)
+              where studentId=#{studentId}
+        </select>
+    <update id="studentCommit" parameterType="java.util.List">
+        update hj_student set studentstate=2,commit_time=CURRENT_TIMESTAMP where studentId in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+    <update id="returnStudent" parameterType="java.util.HashMap">
+        update hj_student set returnTime=CURRENT_TIMESTAMP,studentstate=8,returnNote=#{returnNote} where studentId=#{studentId}
+    </update>
+</mapper>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.MenuDao">
+    <select id="queryMenuByRolrid" parameterType="hashmap" resultType="menu">
+          select DISTINCT(m.menuid),m.menuname,m.menuurl,m.menuimgurl,m.menuparaid from hj_role r left join hj_role_menu rm on
+          (r.roleid=rm.roleid) left join hj_menu m ON (m.menuid=rm.menuid)
+        <where>
+            <if test="roleid!=null and roleid!=''">
+                and r.roleid=#{roleid}
+            </if>
+            <if test="menuparaid!=null and menuparaid!=''">
+                and m.menuparaid=#{menuparaid}
+            </if>
+        </where>
+    </select>
+    <select id="queryMenuByAll" parameterType="hashmap" resultType="menu">
+        select * from hj_menu
+
+    </select>
+    <select id="queryMenuAllInfo" resultType="menu">
+        select * from hj_menu;
+    </select>
+    <update id="insertMenu" parameterType="menu">
+        insert into hj_menu(menuparaid,menuno,menuname,menucode,menuurl)
+        values
+        (#{menuparaid},#{menuno},#{menuname},#{menucode},#{menuurl});
+    </update>
+<!--    <update id="deleteMenu" parameterType="java.util.List">
+      delete from hj_menu where menuid in
+      <foreach collection="list" item="id" open="(" separator="," close=")">
+          #{id}
+      </foreach>
+    </update>-->
+    <update id="addOrUpdateMenu" parameterType="menu" >
+        update hj_menu set menuparaid=#{menuparaid},menuno=#{menuno},menuname=#{menuname},menucode=#{menucode},
+        menuurl=#{menuurl},menuimgurl=#{menuimgurl} where menuid=#{menuid}
+    </update>
+    <select id="hasSecondaryChild" parameterType="int" resultType="menu">
+        select menuid from hj_menu where menuparaid=#{menuparaid};
+    </select>
+    <select id="hasRole" parameterType="int" resultType="role_menu">
+          select menuid from hj_role_menu where menuid=#{menuid}
+    </select>
+    <delete id="deleteMenuById" parameterType="int">
+        delete from hj_menu where menuid=#{menuid}
+    </delete>
+</mapper>

@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.resource.dao.VisitrecordDao">
+    <!--添加回访信息-->
+    <insert id="addhuigang" parameterType="visitrecord">
+        insert into hj_visitrecord(resourceId,create_time,visitRecord) values
+        (#{resourceId},CURRENT_TIMESTAMP,#{visitRecord})
+    </insert>
+</mapper>

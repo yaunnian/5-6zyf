@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.DeptDao">
+    <select id="queryDeptAllCount" parameterType="int" resultType="int">
+          select count(*) from hj_dept;
+    </select>
+    <select id="queryAllDept" parameterType="com.hjcrm.contstans.PageBean" resultType="dept">
+          select d2.*,d1.deptname deptParaname from
+           hj_dept d2 left join
+            hj_dept d1
+            on d1.deptid=d2.deptparaid
+                limit #{currentPage},#{pageSize};
+    </select>
+    <select id="queryDeptAll" resultType="dept">
+         select DISTINCT(d1.deptname) from
+						hj_dept d2 join
+                        hj_dept d1
+                        on d1.deptid=d2.deptparaid
+
+    </select>
+    <select id="queryAllDepts" resultType="dept">
+        select * from hj_dept
+    </select>
+    <insert id="addsaveOrUpdate" parameterType="dept">
+        insert into hj_dept(deptparaid,deptname,deptcode) values
+        (#{deptparaid},#{deptname},#{deptcode})
+    </insert>
+    <update id="updatesaveOrUpdate" parameterType="dept">
+        update hj_dept set deptparaid=#{deptparaid},deptname=#{deptname},deptcode=#{deptcode} where deptid=#{deptid}
+    </update>
+
+    <select id="hasSecondaryChild" parameterType="int" resultType="dept">
+      select deptid from hj_dept where deptparaid=#{deptparaid}
+    </select>
+    <select id="hasRole" parameterType="int" resultType="role_menu">
+        select d.deptid from hj_user u left join hj_dept d on(d.deptid=u.deptid) WHERE u.deptid=#{deptid}
+    </select>
+    <delete id="delete" parameterType="java.util.List">
+        delete from hj_dept where deptid in
+        <foreach collection="list" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+</mapper>

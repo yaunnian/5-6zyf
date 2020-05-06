@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hjcrm.system.dao.CourseDao">
+    <select id="queryCourse" parameterType="com.hjcrm.contstans.PageBean" resultType="course">
+        select * from hj_course  limit #{currentPage},#{pageSize};
+    </select>
+    <select id="queryCourseCount" resultType="int">
+        select count(*) from hj_course;
+    </select>
+    <select id="queryCourseAll" resultType="course">
+        select * from hj_course;
+    </select>
+    <insert id="addCourse" parameterType="course">
+        insert into hj_course(courseTeacherName,courseName,courseMoney,courseDescribe,note) values
+        (#{courseTeacherName},#{courseName},#{courseMoney},#{courseDescribe},#{note})
+    </insert>
+    <update id="updateCourse" parameterType="course">
+        update hj_course set courseTeacherName=#{courseTeacherName},courseName=#{courseName},courseMoney=#{courseMoney},
+        courseDescribe=#{courseDescribe},note=#{note} where courseid=#{courseid}
+    </update>
+</mapper>
